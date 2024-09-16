@@ -29,10 +29,9 @@ const fetchArtworks = async (page: number) => {
 const DataTableWithPagination: React.FC = () => {
   const [selectedArtworks, setSelectedArtworks] = useState<Set<number>>(
     new Set()
-  ); // Store selected IDs across pages
+  ); 
   const [selectionCount, setSelectionCount] = useState<number | null>(null);
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [isOverlayClick, setIsOverlayClick] = useState(false);
 
   const overlayPanelRef = useRef<OverlayPanel>(null);
 
@@ -49,13 +48,18 @@ const DataTableWithPagination: React.FC = () => {
     },
   });
 
-  if (isLoading) return <p>Loading...</p>;
+  if (isLoading)
+    return (
+      <div className=" w-full h-screen flex items-center justify-center border ">
+        <p>Loading...</p>
+      </div>
+    );
   if (error) return <p>An error occurred: {error.message}</p>;
 
   const { artworks = [], totalRecords = 0 } = data || {};
 
   const onPageChange = (event: any) => {
-    setCurrentPage(event.page + 1); 
+    setCurrentPage(event.page + 1);
   };
 
   const onCheckboxChange = (
@@ -66,9 +70,9 @@ const DataTableWithPagination: React.FC = () => {
     setSelectedArtworks((prev) => {
       const newSelected = new Set(prev);
       if (isChecked) {
-        newSelected.add(artworkId); 
+        newSelected.add(artworkId);
       } else {
-        newSelected.delete(artworkId); 
+        newSelected.delete(artworkId);
       }
       return newSelected;
     });
@@ -84,7 +88,7 @@ const DataTableWithPagination: React.FC = () => {
       while (remaining > 0 && page <= totalPages) {
         const response = await fetchArtworks(page);
         const { data } = response;
-
+        console.log(data);
         const rowsToSelect = Math.min(remaining, data.length);
 
         for (let i = 0; i < rowsToSelect; i++) {
@@ -100,21 +104,16 @@ const DataTableWithPagination: React.FC = () => {
       setSelectedArtworks(newSelectedArtworks);
     }
     overlayPanelRef.current?.hide();
-    setIsOverlayClick(false);
   };
 
   const isChecked = (artworkId: number) => {
     return selectedArtworks.has(artworkId);
   };
 
+
   return (
-    <div className="w-[90%] mx-auto mt-10">
-      <OverlayPanel
-        ref={overlayPanelRef}
-        dismissable
-        onShow={() => setIsOverlayClick(true)}
-        onHide={() => setIsOverlayClick(false)}
-      >
+    <div className=" h-full w-[90%] mx-auto mt-10">
+      <OverlayPanel ref={overlayPanelRef} dismissable>
         <div className="p-fluid">
           <h4 className="text-sm font-bold">Select Rows</h4>
           <InputNumber
@@ -130,7 +129,7 @@ const DataTableWithPagination: React.FC = () => {
             icon="pi pi-check"
             onClick={handleSubmitSelection}
             disabled={!selectionCount || selectionCount < 1}
-            className="mt-4 px-4 py-3 text-xl active:font-bold font-semibold bg-cyan-500 text-white hover:cursor-pointer"
+            className="mt-4 px-4 py-3 text-xl active:font-bold font-semibold bg-cyan-400 text-white hover:cursor-pointer"
           />
         </div>
       </OverlayPanel>
@@ -140,30 +139,28 @@ const DataTableWithPagination: React.FC = () => {
         rows={12}
         dataKey="id"
         selectionMode="multiple"
-        selection={Array.from(selectedArtworks)} 
+        selection={Array.from(selectedArtworks)}
         tableStyle={{ minWidth: "50rem" }}
       >
         <Column
-          header={
-            <div className="flex items-center space-x-2">
-              <Button
-                icon="pi pi-check-square"
-                onClick={(e) => {
-                  overlayPanelRef.current?.toggle(e);
-                }}
-                className="p-button-rounded p-button-text"
-              />
-              {isOverlayClick && <i className={"pi pi-check"} />}
-            </div>
-          }
           body={(rowData: Artwork) => (
             <Checkbox
               checked={isChecked(rowData.id)}
               onChange={(e) => onCheckboxChange(e, rowData.id)}
-              className="border rounded-sm border-gray-500"
+              className=" border rounded-sm border-black "
             />
           )}
           headerStyle={{ width: "3em" }}
+        />
+        <Column
+          header={
+            <Button
+              icon="pi pi-chevron-down"
+              onClick={(e) => overlayPanelRef.current?.toggle(e)}
+            />
+          }
+          body={() => null}
+          headerStyle={{ textAlign: "center", width: "3em" }}
         />
         <Column field="title" header="Title"></Column>
         <Column field="place_of_origin" header="Place of origin"></Column>
@@ -177,7 +174,8 @@ const DataTableWithPagination: React.FC = () => {
         first={(currentPage - 1) * 12}
         rows={12}
         totalRecords={totalRecords}
-        onPageChange={onPageChange} // Pagination handling
+        onPageChange={onPageChange}
+        className=" mb-10 mt-5 "
       />
     </div>
   );

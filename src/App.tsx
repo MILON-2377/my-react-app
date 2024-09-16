@@ -1,16 +1,11 @@
-
-import './App.css';
-import './index.css';
-import DataTableWithPagination from './components/DataTableWithPagination'
+import DataTableWithPagination from "./components/DataTableWithPagination";
 
 function App() {
-  
-
   return (
-    <>
-     <DataTableWithPagination />
-    </>
-  )
+    <div className=" w-full h-full flex items-center justify-center ">
+      <DataTableWithPagination />
+    </div>
+  );
 }
 
-export default App
+export default App;
